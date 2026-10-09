@@ -37,6 +37,19 @@ Media-library deletion and full photo access need a **development build** (Expo 
 grant full media-library access). You can also build in the cloud with
 `npx eas-cli@latest build --profile development`.
 
+### Building with EAS
+
+`eas.json` defines these build profiles (run with `npx eas-cli@latest build --profile <name> --platform android|ios`):
+
+| Profile                 | What you get                                                        |
+| ----------------------- | ------------------------------------------------------------------- |
+| `development`           | Dev client for a real device; pair it with `npx expo start`         |
+| `development-simulator` | Same, but an iOS Simulator build                                    |
+| `preview`               | Standalone internal build — an installable `.apk` on Android        |
+| `production`            | Store build (`.aab` / App Store) with auto-incremented build number |
+
+Submit a production build with `npx eas-cli@latest submit --platform android|ios`.
+
 Checks:
 
 ```bash
