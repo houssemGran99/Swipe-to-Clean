@@ -127,7 +127,7 @@ export function SwipeCard({ ref, photo, depth, width, height, enterFrom, onSwipe
       >
         <AssetImage
           id={photo.id}
-          style={[StyleSheet.absoluteFill, styles.image]}
+          style={StyleSheet.absoluteFill}
           contentFit="contain"
           priority={isTop ? 'high' : 'normal'}
         />
@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
   },
-  image: { backgroundColor: '#000' },
   badge: {
     position: 'absolute',
     top: spacing.xxl,

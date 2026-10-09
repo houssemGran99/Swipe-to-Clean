@@ -2,7 +2,6 @@ import { Image, type ImageContentFit } from 'expo-image';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useAssetUri } from '../hooks/useAssetUri';
-import { colors } from '../lib/theme';
 
 type Props = {
   id: string;
@@ -16,7 +15,7 @@ type Props = {
  * Renders a library photo. The URI is resolved lazily, and expo-image decodes the bitmap
  * at view size (not full camera resolution) and caches it, which keeps memory bounded.
  */
-export function AssetImage({ id, style, contentFit = 'cover', priority = 'normal' }: Props) {
+export function AssetImage({ id, style, contentFit = 'contain', priority = 'normal' }: Props) {
   const uri = useAssetUri(id);
   return (
     <View style={[styles.placeholder, style]}>
@@ -37,5 +36,5 @@ export function AssetImage({ id, style, contentFit = 'cover', priority = 'normal
 }
 
 const styles = StyleSheet.create({
-  placeholder: { backgroundColor: colors.surfaceRaised, overflow: 'hidden' },
+  placeholder: { backgroundColor: '#000', overflow: 'hidden' },
 });
