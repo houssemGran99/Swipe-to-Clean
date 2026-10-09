@@ -127,8 +127,8 @@ export function SwipeCard({ ref, photo, depth, width, height, enterFrom, onSwipe
       >
         <AssetImage
           id={photo.id}
-          style={StyleSheet.absoluteFill}
-          contentFit="cover"
+          style={[StyleSheet.absoluteFill, styles.image]}
+          contentFit="contain"
           priority={isTop ? 'high' : 'normal'}
         />
         <Animated.View style={[styles.badge, styles.keepBadge, keepStyle]}>
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: radius.lg,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: '#000',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     shadowColor: '#000',
@@ -161,6 +161,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
   },
+  image: { backgroundColor: '#000' },
   badge: {
     position: 'absolute',
     top: spacing.xxl,
