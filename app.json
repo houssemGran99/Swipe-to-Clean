@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Swipe to Clean",
+    "slug": "swipe-to-clean",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.swipetoclean.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.swipetoclean.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Swipe to Clean needs access to your photos so you can review and delete them.",
+          "savePhotosPermission": false,
+          "granularPermissions": [
+            "photo"
+          ]
+        }
+      ]
+    ],
+    "scheme": "swipetoclean",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
