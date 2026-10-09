@@ -29,13 +29,15 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Swipe to Clean needs access to your photos so you can review and delete them.",
+          "photosPermission": "Swipe to Clean needs access to your photos and videos so you can review and delete them.",
           "savePhotosPermission": false,
           "granularPermissions": [
-            "photo"
+            "photo",
+            "video"
           ]
         }
-      ]
+      ],
+      "expo-video"
     ],
     "scheme": "swipetoclean",
     "experiments": {

@@ -13,7 +13,7 @@ import { AppState, Linking } from 'react-native';
 
 import {
   deletePhotos,
-  fetchAllPhotos,
+  fetchAllMedia,
   forgetUris,
   getPhotoPermission,
   groupByMonth,
@@ -27,20 +27,25 @@ import {
 /** 'idle' covers both "no access" and "first scan still running". */
 type LoadStatus = 'idle' | 'ready' | 'error';
 
-type LibraryContextValue = {
+export type LibraryContextValue = {
   permission: PermissionState | null;
   /** False once the OS will no longer show the permission prompt (user must go to Settings). */
   canAskAgain: boolean;
   status: LoadStatus;
   error: string | null;
-  months: MonthGroup[];
+  /** Photos only, newest first. */
+  photos: Photo[];
+  /** Videos only, newest first. */
+  videos: Photo[];
+  photoMonths: MonthGroup[];
+  videoMonths: MonthGroup[];
   getMonth: (key: string) => MonthGroup | undefined;
   requestPermission: () => Promise<void>;
   openSettings: () => void;
   /** iOS / Android 14+: lets a user with limited access pick more photos. */
   managePhotoSelection: () => Promise<void>;
   refresh: () => Promise<void>;
-  /** Deletes photos from the device. Resolves to false if the user cancelled the OS dialog. */
+  /** Deletes photos/videos from the device. Resolves to false if the user cancelled the OS dialog. */
   deleteFromDevice: (ids: string[]) => Promise<boolean>;
 };
 
@@ -51,16 +56,16 @@ export function LibraryProvider({ children }: PropsWithChildren) {
   const [canAskAgain, setCanAskAgain] = useState(true);
   const [status, setStatus] = useState<LoadStatus>('idle');
   const [error, setError] = useState<string | null>(null);
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [items, setItems] = useState<Photo[]>([]);
   const loadId = useRef(0);
 
   const load = useCallback((): Promise<void> => {
     const id = ++loadId.current;
-    return fetchAllPhotos().then(
+    return fetchAllMedia().then(
       (all) => {
         // A newer load superseded this one (e.g. a library change event fired mid-scan).
         if (id !== loadId.current) return;
-        setPhotos(all);
+        setItems(all);
         setError(null);
         setStatus('ready');
       },
@@ -108,7 +113,7 @@ export function LibraryProvider({ children }: PropsWithChildren) {
 
   const managePhotoSelection = useCallback(async () => {
     try {
-      await presentPermissionsPicker(['photo']);
+      await presentPermissionsPicker(['photo', 'video']);
     } catch {
       // Not available on this platform/OS version.
     }
@@ -124,15 +129,26 @@ export function LibraryProvider({ children }: PropsWithChildren) {
       }
       const removed = new Set(ids);
       forgetUris(ids);
-      setPhotos((prev) => prev.filter((p) => !removed.has(p.id)));
+      setItems((prev) => prev.filter((p) => !removed.has(p.id)));
       return true;
     },
     [],
   );
 
   // Without access, whatever was loaded before is no longer valid to show.
-  const months = useMemo(() => (hasAccess ? groupByMonth(photos) : []), [hasAccess, photos]);
-  const monthIndex = useMemo(() => new Map(months.map((m) => [m.key, m])), [months]);
+  const { photos, videos } = useMemo(() => {
+    const visible = hasAccess ? items : [];
+    return {
+      photos: visible.filter((p) => p.kind === 'photo'),
+      videos: visible.filter((p) => p.kind === 'video'),
+    };
+  }, [hasAccess, items]);
+  const photoMonths = useMemo(() => groupByMonth(photos, 'photo'), [photos]);
+  const videoMonths = useMemo(() => groupByMonth(videos, 'video'), [videos]);
+  const monthIndex = useMemo(
+    () => new Map([...photoMonths, ...videoMonths].map((m) => [m.key, m])),
+    [photoMonths, videoMonths],
+  );
   const getMonth = useCallback((key: string) => monthIndex.get(key), [monthIndex]);
 
   const value = useMemo<LibraryContextValue>(
@@ -141,7 +157,10 @@ export function LibraryProvider({ children }: PropsWithChildren) {
       canAskAgain,
       status: hasAccess ? status : 'idle',
       error,
-      months,
+      photos,
+      videos,
+      photoMonths,
+      videoMonths,
       getMonth,
       requestPermission,
       openSettings,
@@ -155,7 +174,10 @@ export function LibraryProvider({ children }: PropsWithChildren) {
       hasAccess,
       status,
       error,
-      months,
+      photos,
+      videos,
+      photoMonths,
+      videoMonths,
       getMonth,
       requestPermission,
       openSettings,

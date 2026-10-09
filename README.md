@@ -5,15 +5,22 @@ A React Native (Expo) app for cleaning up your photo gallery with a Tinder-style
 
 ## Features
 
-- **Dashboard** – photos grouped by month in a 2-column grid. Each card shows a cover thumbnail,
-  the photo count, a reviewed/total progress bar, and how many photos are queued for deletion.
-- **Swipe deck** – a stacked deck of the month's unreviewed photos. Tilt-to-swipe with live
+- **Home** – device storage card (used / free) and four cleaning categories.
+- **Photos & Videos** – items grouped by month in a 2-column grid with a cover thumbnail,
+  count, reviewed/total progress bar and pending-deletion badge.
+- **Swipe deck** – a stacked deck of the month's unreviewed items. Tilt-to-swipe with live
   `KEEP` / `DELETE` badges, plus footer buttons for Delete (✕), Undo (↺) and Keep (✓).
+  Videos autoplay muted on the top card, with a mute toggle.
 - **Trash review** – after finishing a month you land on a grid of everything you swiped left.
-  Tap any photo to keep it instead, then **Empty Trash** to batch-delete through the native OS
+  Tap any item to keep it instead, then **Empty Trash** to batch-delete through the native OS
   confirmation dialog.
-- Progress is saved, so you can leave a month half-done and come back later.
-- Handles denied / limited photo access, empty libraries, and empty months.
+- **Similar images** – groups bursts and near-duplicates (perceptual hash) and pre-selects all
+  but the sharpest shot of each group for deletion.
+- **Blurry images** – flags out-of-focus / shaky photos (Laplacian variance) with three
+  sensitivity levels.
+- Photo analysis runs on the device, in the background, can be paused/resumed, and is cached.
+- Review progress and analysis results are saved across launches.
+- Handles denied / limited media access, empty libraries, and empty months.
 
 ## Tech stack
 
@@ -23,6 +30,9 @@ A React Native (Expo) app for cleaning up your photo gallery with a Tinder-style
 | Gestures       | `react-native-gesture-handler` + `react-native-reanimated` 4      |
 | Media access   | `expo-media-library` (new `Query` / `Asset` API)                  |
 | Images         | `expo-image` (downscaled decoding, memory + disk cache)           |
+| Video          | `expo-video` (playback), `expo-video-thumbnails` (still frames)   |
+| Analysis       | `expo-image-manipulator` (native downscale) + `upng-js` (decode)  |
+| Storage        | `expo-file-system` (`Paths.totalDiskSpace` / `availableDiskSpace`) |
 | State          | React Context + `useReducer`, persisted with AsyncStorage         |
 | Styling        | `StyleSheet`                                                      |
 
@@ -63,13 +73,19 @@ npm run lint
 src/
   app/                 Expo Router screens
     _layout.tsx        Providers + stack navigator
-    index.tsx          Dashboard (month grid, permission/empty states)
+    index.tsx          Home: storage card + categories
+    months/[kind].tsx  Month grid for photos or videos
     month/[key].tsx    Swipe deck for one month
     trash/[key].tsx    Trash review + Empty Trash
+    similar.tsx        Similar-photo groups
+    blurry.tsx         Blurry photos
   components/          SwipeDeck, SwipeCard, MonthCard, AssetImage, …
   hooks/               useAssetUri (lazy URI resolution), useMonthStats
-  lib/media.ts         Permissions, fetching, month grouping, deletion
-  state/               LibraryContext (device photos), ReviewContext (keep/delete decisions)
+  lib/media.ts         Permissions, fetching, month grouping, deletion, thumbnails
+  lib/imageAnalysis.ts Native downscale + PNG decode for each photo
+  lib/imageMath.ts     Sharpness (Laplacian variance), dHash, similar-photo grouping
+  state/               LibraryContext (device media), ReviewContext (keep/delete decisions),
+                       AnalysisContext (background scan + cached results)
 ```
 
 ## How it stays fast on large camera rolls
@@ -85,3 +101,16 @@ src/
 Decisions are stored per month as `{ decisions: Record<photoId, 'keep' | 'delete'>, history: photoId[] }`
 (see `src/state/reviewReducer.ts`). `history` drives Undo; restoring from the trash flips a
 decision to `keep`; after a successful device delete, the ids are purged from every month.
+
+## How photo analysis works
+
+Each photo is downscaled natively to 256 px with `expo-image-manipulator`, decoded in JS, and
+converted to grayscale. From that copy we compute:
+
+- **Sharpness** – variance of the Laplacian. Low values mean few sharp edges, i.e. blur.
+  Thresholds per sensitivity live in `BLUR_THRESHOLDS` (`src/lib/imageMath.ts`). Very dark or
+  plain photos (night sky, a white wall) can score low too, so review the list before deleting.
+- **Difference hash** – a 64-bit fingerprint. Photos taken within 24 h of each other whose
+  hashes differ by ≤ 10 bits are grouped as similar; the sharpest one is suggested to keep.
+
+Results are cached in AsyncStorage, so only new photos are analysed on later runs.

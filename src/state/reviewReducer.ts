@@ -92,3 +92,12 @@ export function isReviewState(value: unknown): value is ReviewState {
     (value as { months: unknown }).months !== null
   );
 }
+
+/** Saved state from before videos existed used bare `YYYY-MM` keys for photo months. */
+export function migrateReviewState(state: ReviewState): ReviewState {
+  const months: Record<string, MonthReview> = {};
+  for (const [key, month] of Object.entries(state.months)) {
+    months[/^\d{4}-\d{2}$/.test(key) ? `photo-${key}` : key] = month;
+  }
+  return { ...state, months };
+}
