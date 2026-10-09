@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AssetImage } from '../../components/AssetImage';
 import { EmptyState } from '../../components/EmptyState';
 import { useMonthStats } from '../../hooks/useMonthStats';
-import type { Photo } from '../../lib/media';
+import { kindOfMonthKey, type Photo } from '../../lib/media';
 import { colors, radius, spacing } from '../../lib/theme';
 import { useLibrary } from '../../state/LibraryContext';
 import { useMonthReview, useReview } from '../../state/ReviewContext';
@@ -34,6 +34,12 @@ export default function TrashScreen() {
   const stats = useMonthStats(month, useMonthReview(key));
   const [deleting, setDeleting] = useState(false);
 
+  const kind = kindOfMonthKey(key);
+  const noun = kind === 'video' ? 'video' : 'photo';
+  const backToMonths = useCallback(
+    () => router.dismissTo({ pathname: '/months/[kind]', params: { kind } }),
+    [router, kind],
+  );
   const tile = Math.floor((width - GAP * (COLUMNS - 1)) / COLUMNS);
   const count = stats.toDelete.length;
 
@@ -42,16 +48,16 @@ export default function TrashScreen() {
       <Pressable
         onPress={() => restore(key, item.id)}
         accessibilityRole="button"
-        accessibilityLabel="Keep this photo instead"
+        accessibilityLabel={`Keep this ${noun} instead`}
         style={({ pressed }) => [{ width: tile, height: tile }, pressed && styles.pressed]}
       >
-        <AssetImage id={item.id} style={StyleSheet.absoluteFill} />
+        <AssetImage item={item} style={StyleSheet.absoluteFill} />
         <View style={styles.restoreChip}>
           <Text style={styles.restoreText}>↩︎</Text>
         </View>
       </Pressable>
     ),
-    [restore, key, tile],
+    [restore, key, tile, noun],
   );
 
   const emptyTrash = useCallback(async () => {
@@ -65,18 +71,18 @@ export default function TrashScreen() {
       return;
     }
     purge(ids);
-    Alert.alert('Trash emptied', `${ids.length} photo${ids.length === 1 ? '' : 's'} deleted.`, [
-      { text: 'Back to months', onPress: () => router.dismissTo('/') },
+    Alert.alert('Trash emptied', `${ids.length} ${noun}${ids.length === 1 ? '' : 's'} deleted.`, [
+      { text: 'Back to months', onPress: backToMonths },
     ]);
-  }, [stats.toDelete, library, purge, router]);
+  }, [stats.toDelete, library, purge, noun, backToMonths]);
 
   if (count === 0) {
     return (
       <EmptyState
         icon="✨"
         title="Trash is empty"
-        message="No photos from this month are marked for deletion."
-        actions={[{ label: 'Back to months', onPress: () => router.dismissTo('/') }]}
+        message={`No ${noun}s from this month are marked for deletion.`}
+        actions={[{ label: 'Back to months', onPress: backToMonths }]}
       />
     );
   }
@@ -84,7 +90,7 @@ export default function TrashScreen() {
   return (
     <View style={styles.screen}>
       <Text style={styles.hint}>
-        {count} photo{count === 1 ? '' : 's'} marked for deletion. Tap a photo to keep it instead.
+        {`${count} ${noun}${count === 1 ? '' : 's'} marked for deletion. Tap one to keep it instead.`}
       </Text>
       <FlatList
         data={stats.toDelete}

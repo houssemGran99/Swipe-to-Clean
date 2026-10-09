@@ -22,11 +22,11 @@ function MonthCardImpl({ month, stats, width, onPress }: Props) {
     <Pressable
       onPress={() => onPress(month.key)}
       accessibilityRole="button"
-      accessibilityLabel={`${month.label}, ${stats.total} photos, ${stats.reviewed} reviewed`}
+      accessibilityLabel={`${month.label}, ${stats.total} ${month.kind}s, ${stats.reviewed} reviewed`}
       style={({ pressed }) => [styles.card, { width }, pressed && styles.pressed]}
     >
       <View style={{ width, height: width }}>
-        {cover ? <AssetImage id={cover.id} style={StyleSheet.absoluteFill} /> : null}
+        {cover ? <AssetImage item={cover} style={StyleSheet.absoluteFill} showVideoBadge={false} /> : null}
         {stats.done ? (
           <View style={styles.doneBadge}>
             <Text style={styles.doneText}>✓ Done</Text>

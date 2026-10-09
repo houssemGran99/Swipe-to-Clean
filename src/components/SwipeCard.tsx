@@ -14,6 +14,7 @@ import { scheduleOnRN, scheduleOnUI } from 'react-native-worklets';
 import type { Photo } from '../lib/media';
 import { colors, radius, spacing } from '../lib/theme';
 import { AssetImage } from './AssetImage';
+import { VideoPreview } from './VideoPreview';
 
 export type SwipeDirection = 'left' | 'right';
 
@@ -122,15 +123,17 @@ export function SwipeCard({ ref, photo, depth, width, height, enterFrom, onSwipe
           { width, height, zIndex: 10 - depth, pointerEvents: isTop ? 'auto' : 'none' },
           cardStyle,
         ]}
-        accessibilityLabel="Photo"
+        accessibilityLabel={photo.kind === 'video' ? 'Video' : 'Photo'}
         accessibilityHint="Swipe left to delete, swipe right to keep"
       >
         <AssetImage
-          id={photo.id}
+          item={photo}
           style={StyleSheet.absoluteFill}
           contentFit="contain"
           priority={isTop ? 'high' : 'normal'}
+          showVideoBadge={false}
         />
+        {isTop && photo.kind === 'video' ? <VideoPreview id={photo.id} /> : null}
         <Animated.View style={[styles.badge, styles.keepBadge, keepStyle]}>
           <Text style={[styles.badgeText, { color: colors.keep }]}>KEEP</Text>
         </Animated.View>

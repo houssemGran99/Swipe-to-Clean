@@ -14,6 +14,7 @@ import {
   getMonthReview,
   initialReviewState,
   isReviewState,
+  migrateReviewState,
   reviewReducer,
   type Decision,
   type MonthReview,
@@ -44,7 +45,7 @@ export function ReviewProvider({ children }: PropsWithChildren) {
       .then((raw) => {
         if (!raw) return;
         const parsed: unknown = JSON.parse(raw);
-        if (isReviewState(parsed)) dispatch({ type: 'hydrate', state: parsed });
+        if (isReviewState(parsed)) dispatch({ type: 'hydrate', state: migrateReviewState(parsed) });
       })
       .catch(() => {
         // Corrupt or unreadable storage: start fresh.

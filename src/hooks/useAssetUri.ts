@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import { resolveUri } from '../lib/media';
+import { resolveImageUri, type MediaKind } from '../lib/media';
 
-/** Lazily resolves an asset URI; only mounted (i.e. visible) items ever trigger a lookup. */
-export function useAssetUri(id: string): string | null {
+/** Lazily resolves a displayable image URI (a still frame for videos); only mounted (i.e. visible) items ever trigger a lookup. */
+export function useAssetUri(id: string, kind: MediaKind = 'photo'): string | null {
   const [resolved, setResolved] = useState<{ id: string; uri: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    resolveUri(id).then(
+    resolveImageUri(id, kind).then(
       (uri) => {
         if (!cancelled) setResolved({ id, uri });
       },
@@ -19,7 +19,7 @@ export function useAssetUri(id: string): string | null {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, kind]);
 
   // Ignore a stale result while a new id is resolving (e.g. a recycled list cell).
   return resolved?.id === id ? resolved.uri : null;

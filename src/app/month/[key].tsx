@@ -10,7 +10,7 @@ import { RoundButton } from '../../components/RoundButton';
 import type { SwipeDirection } from '../../components/SwipeCard';
 import { SwipeDeck, type SwipeDeckHandle } from '../../components/SwipeDeck';
 import { useMonthStats } from '../../hooks/useMonthStats';
-import { monthLabelFor } from '../../lib/media';
+import { kindOfMonthKey, monthLabelFor } from '../../lib/media';
 import { colors, radius, spacing } from '../../lib/theme';
 import { useLibrary } from '../../state/LibraryContext';
 import { useMonthReview, useReview } from '../../state/ReviewContext';
@@ -28,6 +28,7 @@ export default function SwipeDeckScreen() {
   const [returning, setReturning] = useState<{ id: string; from: SwipeDirection } | null>(null);
 
   const title = month?.label ?? monthLabelFor(key);
+  const noun = kindOfMonthKey(key) === 'video' ? 'videos' : 'photos';
   const openTrash = useCallback(
     () => router.push({ pathname: '/trash/[key]', params: { key } }),
     [router, key],
@@ -79,7 +80,7 @@ export default function SwipeDeckScreen() {
         <EmptyState
           icon="🗓️"
           title="This month is empty"
-          message="There are no photos left in this month. They may have been deleted or moved."
+          message={`There are no ${noun} left in this month. They may have been deleted or moved.`}
           actions={[{ label: 'Back to months', onPress: () => router.back() }]}
         />
       </>
@@ -110,7 +111,7 @@ export default function SwipeDeckScreen() {
             message={
               stats.toDelete.length > 0
                 ? `You kept ${stats.kept} and marked ${stats.toDelete.length} for deletion.`
-                : `You kept all ${stats.kept} photos.`
+                : `You kept all ${stats.kept} ${noun}.`
             }
             actions={[
               ...(stats.toDelete.length > 0

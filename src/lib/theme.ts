@@ -9,6 +9,8 @@ export const colors = {
   delete: '#EF4444',
   accent: '#60A5FA',
   warning: '#F59E0B',
+  storageUsed: '#F59E0B',
+  storageFree: '#3B3550',
 } as const;
 
 export const radius = { sm: 8, md: 14, lg: 22, pill: 999 } as const;
