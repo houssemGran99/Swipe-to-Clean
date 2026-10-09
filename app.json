@@ -40,6 +40,12 @@
     "scheme": "swipetoclean",
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "houssem.hunter",
+    "extra": {
+      "eas": {
+        "projectId": "3badeff9-6503-4e67-8706-203618fc39af"
+      }
     }
   }
 }
