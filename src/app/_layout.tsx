@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { SplashGate } from '../components/SplashGate';
 import { colors } from '../lib/theme';
 import { AnalysisProvider } from '../state/AnalysisContext';
 import { LibraryProvider } from '../state/LibraryContext';
@@ -16,6 +17,7 @@ export default function RootLayout() {
         <LibraryProvider>
           <ReviewProvider>
             <AnalysisProvider>
+            <SplashGate />
             <StatusBar style="light" />
             <Stack
               screenOptions={{

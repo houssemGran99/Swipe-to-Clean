@@ -37,7 +37,16 @@
           ]
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 280,
+          "resizeMode": "contain",
+          "backgroundColor": "#0E0F13"
+        }
+      ]
     ],
     "scheme": "swipetoclean",
     "experiments": {
