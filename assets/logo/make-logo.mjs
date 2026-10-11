@@ -76,7 +76,8 @@ function svg({ bg = true, scale = 1, mono = false } = {}) {
 
 const outputs = [
   { file: 'icon.png', size: 1024, svg: svg({ scale: 0.96 }) },
-  { file: 'splash-icon.png', size: 1024, svg: svg({ bg: false, scale: 0.9 }) },
+  // Android 12+ shows the splash icon inside a circle covering ~2/3 of the image: keep it small.
+  { file: 'splash-icon.png', size: 1024, svg: svg({ bg: false, scale: 0.62 }) },
   { file: 'favicon.png', size: 48, svg: svg({ scale: 1 }) },
   // Android adaptive icon: art must sit inside the central ~66% safe zone.
   { file: 'android-icon-foreground.png', size: 512, svg: svg({ bg: false, scale: 0.6 }) },
