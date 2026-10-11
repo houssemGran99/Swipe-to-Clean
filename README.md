@@ -114,3 +114,10 @@ converted to grayscale. From that copy we compute:
   hashes differ by ≤ 10 bits are grouped as similar; the sharpest one is suggested to keep.
 
 Results are cached in AsyncStorage, so only new photos are analysed on later runs.
+
+## App icon
+
+The logo source is `assets/logo/logo.svg`. `assets/logo/make-logo.mjs` renders every icon size
+from it (iOS icon, Android adaptive foreground/background/monochrome, favicon, splash). To
+regenerate after editing, run it with Playwright available, e.g.
+`npm i --no-save playwright && node assets/logo/make-logo.mjs`.
