@@ -60,6 +60,15 @@ grant full media-library access). You can also build in the cloud with
 
 Submit a production build with `npx eas-cli@latest submit --platform android|ios`.
 
+#### Building from GitHub Actions
+
+`.github/workflows/eas-build.yml` typechecks, lints and then queues an EAS build:
+
+- **Every push to `main`** queues an Android `preview` build (an installable APK).
+- **Manual runs** (Actions → EAS Build → Run workflow) let you pick the platform (`android`, `ios`, `all`) and profile.
+
+It needs one repository secret, `EXPO_TOKEN`: create an access token at expo.dev → Account settings → Access tokens, then add it under GitHub → Settings → Secrets and variables → Actions. The job only queues the build (`--no-wait`); follow progress and download the result on expo.dev. iOS builds need signing credentials set up once interactively (`npx eas-cli@latest credentials`) before they can run on CI.
+
 Checks:
 
 ```bash
